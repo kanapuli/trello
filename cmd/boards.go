@@ -19,6 +19,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"strings"
 
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -88,4 +89,15 @@ func getBoards() []boards {
 
 	return trelloBoards
 
+}
+
+func getBoardID(boardName string) string {
+	availableBoards := getBoards()
+	for _, boards := range availableBoards {
+		if strings.ToLower(boards.Name) == strings.ToLower(boardName) {
+			boardID := boards.ID
+			return boardID
+		}
+	}
+	return ""
 }
