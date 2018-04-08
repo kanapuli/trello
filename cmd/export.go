@@ -19,9 +19,11 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"os"
 	"strconv"
 	"time"
 
+	homedir "github.com/mitchellh/go-homedir"
 	"github.com/tealeg/xlsx"
 
 	"github.com/spf13/cobra"
@@ -271,9 +273,15 @@ func writeExcel(cards []card) {
 		cell = row.AddCell()
 		cell.Value = cardInfo.ShortURL
 	}
-
-	err = file.Save("Myexcel.xlsx")
+	home, err := homedir.Dir()
+	if err != nil {
+		fmt.Println(err)
+		os.Exit(1)
+	}
+	path := fmt.Sprintf("%s/Trello.xlsx", home)
+	err = file.Save(path)
 	if err != nil {
 		log.Fatal("Could not save excelfile")
 	}
+	fmt.Printf("Please check your file in %s/Trello.xlsx\n", home)
 }
