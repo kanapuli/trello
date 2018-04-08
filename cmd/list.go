@@ -15,23 +15,32 @@
 package cmd
 
 import (
+	"encoding/json"
 	"fmt"
+	"log"
+	"net/http"
+	"strings"
 
 	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 )
+
+type lists struct {
+	ID   string `json:"id"`
+	Name string `json:"name"`
+}
 
 // listCmd represents the list command
 var listCmd = &cobra.Command{
 	Use:   "list",
-	Short: "A brief description of your command",
-	Long: `A longer description that spans multiple lines and likely contains examples
-and usage of using your command. For example:
-
-Cobra is a CLI library for Go that empowers applications.
-This application is a tool to generate the needed files
-to quickly create a Cobra application.`,
+	Short: "fetch all lists of a board",
+	Long:  `Usage: trello list "board name"`,
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("list called")
+		lists := getLists(args)
+		fmt.Printf("%s\n------------------------\n", "Lists Available")
+		for _, list := range lists {
+			fmt.Printf("%s\n", list.Name)
+		}
 	},
 }
 
@@ -47,4 +56,40 @@ func init() {
 	// Cobra supports local flags which will only run when this command
 	// is called directly, e.g.:
 	// listCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
+}
+
+func getLists(args []string) []lists {
+	if len(args) == 0 {
+		log.Fatalln("No board name specified")
+	}
+	requestedBoardName := args[0]
+	availableBoards := getBoards()
+	boardID := ""
+	for _, boards := range availableBoards {
+		if strings.ToLower(boards.Name) == strings.ToLower(requestedBoardName) {
+			boardID = boards.ID
+		}
+	}
+	apiKey = viper.Get("apiKey")
+	clientToken = viper.Get("token")
+	url := fmt.Sprintf("%s/1/boards/%s/lists?key=%s&token=%s", trelloURL, boardID, apiKey, clientToken)
+	req, err := http.NewRequest("GET", url, nil)
+	if err != nil {
+		log.Fatal("Error occured: ", err)
+	}
+	client := &http.Client{}
+	resp, err := client.Do(req)
+	if err != nil {
+		log.Fatal("Do: ", err)
+	}
+	if resp.StatusCode != 200 {
+		log.Fatal("bad request sent to trello api")
+	}
+	defer resp.Body.Close()
+	var trelloLists []lists
+	if err := json.NewDecoder(resp.Body).Decode(&trelloLists); err != nil {
+		log.Fatal("Error decoding trello response: ", err)
+	}
+
+	return trelloLists
 }
