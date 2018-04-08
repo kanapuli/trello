@@ -112,7 +112,7 @@ type cardDetails struct {
 	IDLabels              []string `json:"idLabels"`
 	ManualCoverAttachment bool     `json:"manualCoverAttachment"`
 	Name                  string   `json:"name"`
-	Pos                   int      `json:"pos"`
+	Pos                   float32  `json:"pos"`
 	ShortLink             string   `json:"shortLink"`
 	ShortURL              string   `json:"shortUrl"`
 	Subscribed            bool     `json:"subscribed"`
@@ -261,7 +261,7 @@ func writeExcel(cards []card) {
 		cell.Value = strconv.FormatBool(cardInfo.DueComplete)
 		//Add card no.of comments
 		cell = row.AddCell()
-		cell.Value = string(cardInfo.Badges.Comments)
+		cell.Value = strconv.Itoa(cardInfo.Badges.Comments)
 		//Add card members
 		cell = row.AddCell()
 		var member string
