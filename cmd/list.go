@@ -63,13 +63,12 @@ func getLists(args []string) []lists {
 		log.Fatalln("No board name specified")
 	}
 	requestedBoardName := args[0]
-	availableBoards := getBoards()
-	boardID := ""
-	for _, boards := range availableBoards {
-		if strings.ToLower(boards.Name) == strings.ToLower(requestedBoardName) {
-			boardID = boards.ID
-		}
+
+	boardID := getBoardID(requestedBoardName)
+	if boardID == "" {
+		log.Fatal("Specified board name not available")
 	}
+
 	apiKey = viper.Get("apiKey")
 	clientToken = viper.Get("token")
 	url := fmt.Sprintf("%s/1/boards/%s/lists?key=%s&token=%s", trelloURL, boardID, apiKey, clientToken)
@@ -92,4 +91,14 @@ func getLists(args []string) []lists {
 	}
 
 	return trelloLists
+}
+
+func getListID(boardName, listName string) string {
+	lists := getLists([]string{boardName})
+	for _, list := range lists {
+		if strings.ToLower(list.Name) == strings.ToLower(listName) {
+			return list.ID
+		}
+	}
+	return ""
 }
