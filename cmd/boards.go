@@ -33,37 +33,17 @@ type boards struct {
 // boardCmd represents the board command
 var boardsCmd = &cobra.Command{
 	Use:   "boards",
-	Short: "trello board helps to list the boards and their board ids",
-	Long:  `trello board helps to list the boards and their board ids`,
+	Short: "list all boards",
+	Long: `list all board names and the ids.
+	       Usage: trello boards
+	`,
 	Run: func(cmd *cobra.Command, args []string) {
 		//trelloURL = "https://api.trello.com"
-		apiKey = viper.Get("apiKey")
-		clientToken = viper.Get("token")
-		url := fmt.Sprintf("%s/1/members/me/boards?key=%s&token=%s", trelloURL, apiKey, clientToken)
-
-		req, err := http.NewRequest("GET", url, nil)
-		if err != nil {
-			log.Fatal("Error occured: ", err)
-		}
-		client := &http.Client{}
-		resp, err := client.Do(req)
-		if err != nil {
-			log.Fatal("Do: ", err)
-		}
-
-		if resp.StatusCode != 200 {
-			log.Fatal("bad request sent to trello api")
-		}
-		defer resp.Body.Close()
-		var trelloBoards []boards
-		if err := json.NewDecoder(resp.Body).Decode(&trelloBoards); err != nil {
-			log.Fatal("Error decoding trello response: ", err)
-		}
+		boards := getBoards()
 		fmt.Printf("%s\n------------------------\n", "List of Boards")
-		for _, board := range trelloBoards {
+		for _, board := range boards {
 			fmt.Printf("%s\n", board.Name)
 		}
-
 	},
 }
 
@@ -79,5 +59,33 @@ func init() {
 	// Cobra supports local flags which will only run when this command
 	// is called directly, e.g.:
 	// boardsCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
+
+}
+
+func getBoards() []boards {
+	apiKey = viper.Get("apiKey")
+	clientToken = viper.Get("token")
+	url := fmt.Sprintf("%s/1/members/me/boards?key=%s&token=%s", trelloURL, apiKey, clientToken)
+
+	req, err := http.NewRequest("GET", url, nil)
+	if err != nil {
+		log.Fatal("Error occured: ", err)
+	}
+	client := &http.Client{}
+	resp, err := client.Do(req)
+	if err != nil {
+		log.Fatal("Do: ", err)
+	}
+
+	if resp.StatusCode != 200 {
+		log.Fatal("bad request sent to trello api")
+	}
+	defer resp.Body.Close()
+	var trelloBoards []boards
+	if err := json.NewDecoder(resp.Body).Decode(&trelloBoards); err != nil {
+		log.Fatal("Error decoding trello response: ", err)
+	}
+
+	return trelloBoards
 
 }
