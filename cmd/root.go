@@ -35,7 +35,8 @@ var rootCmd = &cobra.Command{
 	Use:   "trello",
 	Short: "trello is a binary to export your trello boards to excel files",
 	Long: `
-	trello is a golang powered utility to ease the life of devs who work with Trello boards. Now export your Trello boards to Excels using trello`,
+	Now export your Trello boards to an excel file with ease :) An SRE tool. Move the binary to /usr/sbin/ so that it can be called from any working path.
+	`,
 }
 
 // Execute adds all child commands to the root command and sets flags appropriately.
